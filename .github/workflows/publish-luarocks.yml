@@ -1,0 +1,25 @@
+name: Publish to LuaRocks
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua and LuaRocks
+        uses: leafo/gh-actions-lua@v11
+        with:
+          luaVersion: "5.4"
+
+      - uses: leafo/gh-actions-luarocks@v5
+
+      - name: Upload rockspec
+        env:
+          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+        run: |
+          luarocks upload *.rockspec --api-key="$LUAROCKS_API_KEY"
