@@ -21,16 +21,6 @@ local M = {}
 
 local std = require("tomltools.std")
 
-local VALID_JSON_TYPES = {
-    ["null"]    = true,
-    ["boolean"] = true,
-    ["object"]  = true,
-    ["array"]   = true,
-    ["number"]  = true,
-    ["string"]  = true,
-    ["integer"] = true,
-}
-
 ---@class loop.json.ValidationError
 ---@field node_id integer?
 ---@field err_msg string
@@ -73,15 +63,13 @@ local function _validate(schema, data, node_id, dt, errors)
         local allowed = type(schema.type) == "table" and schema.type or { schema.type }
         local ok = false
         for _, t in ipairs(allowed) do
-            if VALID_JSON_TYPES[t] then
-                if t == "null" and data == nil then ok = true
-                elseif t == "boolean" and type(data) == "boolean" then ok = true
-                elseif t == "integer" and type(data) == "number" and data == math.floor(data) then ok = true
-                elseif t == "number" and type(data) == "number" then ok = true
-                elseif t == "string" and type(data) == "string" then ok = true
-                elseif t == "array" and std.islist(data) then ok = true
-                elseif t == "object" and type(data) == "table" and not std.islist(data) then ok = true
-                end
+            if t == "null" and data == nil then ok = true
+            elseif t == "boolean" and type(data) == "boolean" then ok = true
+            elseif t == "integer" and type(data) == "number" and data == math.floor(data) then ok = true
+            elseif t == "number" and type(data) == "number" then ok = true
+            elseif t == "string" and type(data) == "string" then ok = true
+            elseif t == "array" and std.islist(data) then ok = true
+            elseif t == "object" and type(data) == "table" and not std.islist(data) then ok = true
             end
             if ok then break end
         end
