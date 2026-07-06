@@ -450,8 +450,7 @@ local function evaluate(cst, with_type_map)
     end
 
     -- Attach insertion-order metadata to every table we tracked keys for. This
-    -- covers intermediate implicit tables (e.g. `a` in `[a.b]` / `[a.c]`) that are
-    -- never a section leaf and so were previously left unordered.
+    -- covers intermediate implicit tables (e.g. `a` in `[a.b]` / `[a.c]`)
     for tbl, ko in pairs(key_orders) do
         table_util.ordered(tbl, ko)
     end
