@@ -5,3 +5,4 @@ CLAUDE.md
 *.rock
 /lua_modules
 /.luarocks
+.claude/settings.json
