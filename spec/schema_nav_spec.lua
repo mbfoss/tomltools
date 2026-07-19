@@ -6,9 +6,7 @@ local function make_dt(parts)
     return { key_parts_of = function() return parts end }
 end
 
--- ─────────────────────────────────────────────────────────────────────────────
 -- flatten
--- ─────────────────────────────────────────────────────────────────────────────
 
 describe("schema_nav.flatten", function()
     it("copies base schema keys verbatim", function()
@@ -118,12 +116,10 @@ describe("schema_nav.flatten", function()
     end)
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
 -- schema_at
--- ─────────────────────────────────────────────────────────────────────────────
 
 describe("schema_nav.schema_at", function()
-    -- Shared fixture ──────────────────────────────────────────────────────────
+    -- Shared fixture
     local root_schema = {
         type       = "object",
         properties = {
@@ -244,9 +240,7 @@ describe("schema_nav.schema_at", function()
     end)
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
 -- raw_schema_at
--- ─────────────────────────────────────────────────────────────────────────────
 
 describe("schema_nav.raw_schema_at", function()
     it("preserves oneOf on the target node (not flattened)", function()

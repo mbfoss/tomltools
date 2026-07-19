@@ -11,8 +11,7 @@ local std = require("tomltools.std")
 
 local M = {}
 
--- ───────────────────────────── encode ─────────────────────────────
-
+-- encode
 local ESCAPES = {
     ['"'] = '\\"', ["\\"] = "\\\\", ["\b"] = "\\b", ["\f"] = "\\f",
     ["\n"] = "\\n", ["\r"] = "\\r", ["\t"] = "\\t",
@@ -69,8 +68,7 @@ function M.encode(v)
     return table.concat(acc)
 end
 
--- ───────────────────────────── decode ─────────────────────────────
-
+-- decode
 local function decode_error(s, pos, msg)
     error(("json.decode: %s at position %d"):format(msg, pos), 2)
 end
