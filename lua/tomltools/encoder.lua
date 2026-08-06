@@ -123,25 +123,35 @@ local encode_value  -- forward decl
 ---@param opts tomltools.EncodeArrayOpts?
 ---@return string
 local function encode_array(arr, opts)
-    if #arr == 0 then return "[]" end
+    local n = #arr
+    if n == 0 then return "[]" end
+
     local items = {}
-    for _, v in ipairs(arr) do
-        items[#items+1] = encode_value(v)
+    for i = 1, n do
+        items[i] = encode_value(arr[i])
     end
 
-    local single    = "[ " .. table.concat(items, ", ") .. " ]"
     local multiline = opts and opts.multiline
-    if multiline == nil then multiline = #single > 80 end
-    if not multiline then return single end
+    if multiline == nil then
+        -- Width of the single-line form, summed instead of built: "[ ", " ]"
+        -- and a ", " between each pair of items. Joining the items only to
+        -- measure them would throw the string away whenever the array wraps.
+        local width = 4 + (n - 1) * 2
+        for i = 1, n do width = width + #items[i] end
+        multiline = width > 80
+    end
+    if not multiline then return "[ " .. table.concat(items, ", ") .. " ]" end
 
+    -- Shift the items up one slot so the brackets fit around them in the same
+    -- table, leaving a single join for the whole block.
     local indent = (opts and opts.indent) or ""
     local inner  = indent .. "  "
-    local lines  = { indent .. "[" }
-    for _, item in ipairs(items) do
-        lines[#lines+1] = inner .. item .. ","
+    for i = n, 1, -1 do
+        items[i + 1] = inner .. items[i] .. ","
     end
-    lines[#lines+1] = indent .. "]"
-    return table.concat(lines, "\n")
+    items[1]     = indent .. "["
+    items[n + 2] = indent .. "]"
+    return table.concat(items, "\n")
 end
 
 ---@param tbl table

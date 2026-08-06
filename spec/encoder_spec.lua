@@ -26,6 +26,18 @@ describe("encode_array", function()
         assert.equals('  "item-10-padding",\n]', out:sub(- #'  "item-10-padding",\n]'))
     end)
 
+    it("switches to the wrapped form just past 80 columns", function()
+        -- 35 padding characters plus both quotes encode to 37 columns, so two
+        -- items land exactly on the 80-column limit: 2 + 37 + 2 + 37 + 2.
+        local pad = string.rep("a", 35)
+        local at_limit = encoder.encode_array({ pad, pad })
+        assert.equals(80, #at_limit)
+        assert.is_nil(at_limit:find("\n", 1, true))
+
+        local over_limit = encoder.encode_array({ pad .. "a", pad .. "a" })
+        assert.is_not_nil(over_limit:find("\n", 1, true))
+    end)
+
     it("forces one item per line with multiline = true", function()
         assert.equals("[\n  1,\n  2,\n]", encoder.encode_array({ 1, 2 }, { multiline = true }))
     end)
