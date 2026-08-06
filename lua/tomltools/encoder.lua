@@ -115,17 +115,33 @@ end
 
 local encode_value  -- forward decl
 
----@param arr table
+---@class tomltools.EncodeArrayOpts
+---@field multiline boolean?  force one item per line (true) or a single line (false); omit to choose by width
+---@field indent    string?   outer indentation; inner items get two extra spaces (used when multiline)
+
+---@param arr  table
+---@param opts tomltools.EncodeArrayOpts?
 ---@return string
-local function encode_array(arr)
+local function encode_array(arr, opts)
     if #arr == 0 then return "[]" end
     local items = {}
     for _, v in ipairs(arr) do
         items[#items+1] = encode_value(v)
     end
-    local single = "[ " .. table.concat(items, ", ") .. " ]"
-    if #single <= 80 then return single end
-    return "[\n  " .. table.concat(items, ",\n  ") .. ",\n]"
+
+    local single    = "[ " .. table.concat(items, ", ") .. " ]"
+    local multiline = opts and opts.multiline
+    if multiline == nil then multiline = #single > 80 end
+    if not multiline then return single end
+
+    local indent = (opts and opts.indent) or ""
+    local inner  = indent .. "  "
+    local lines  = { indent .. "[" }
+    for _, item in ipairs(items) do
+        lines[#lines+1] = inner .. item .. ","
+    end
+    lines[#lines+1] = indent .. "]"
+    return table.concat(lines, "\n")
 end
 
 ---@param tbl table
@@ -222,6 +238,18 @@ function M.encode_inline(t, opts)
         return encode_inline_table_multiline(t, opts.indent or "")
     end
     return encode_inline_table(t)
+end
+
+--- Encode a Lua list as a TOML array string: [ val, val, ... ].
+--- Pass opts.multiline = true for one item per line (false to force a single
+--- line); omit it to lay the array out by width, as `encode` does. All lines
+--- carry their own indentation so the caller can split("\n") and insert
+--- directly.
+---@param arr  any[]
+---@param opts tomltools.EncodeArrayOpts?
+---@return string
+function M.encode_array(arr, opts)
+    return encode_array(arr, opts)
 end
 
 --- Encode a Lua table as a [[key]] AoT entry block.
