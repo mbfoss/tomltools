@@ -78,6 +78,58 @@ describe("encode_inline", function()
     end)
 end)
 
+describe("encode_kvp", function()
+    it("encodes one pair", function()
+        assert.equals('command = "make"', encoder.encode_kvp("command", "make"))
+        assert.equals("jobs = 4", encoder.encode_kvp("jobs", 4))
+    end)
+
+    it("quotes a key that is not bare", function()
+        assert.equals('"my key" = 1', encoder.encode_kvp("my key", 1))
+        assert.equals('"a.b" = 1', encoder.encode_kvp("a.b", 1))
+    end)
+
+    it("encodes a table value inline", function()
+        assert.equals("opts = { a = 1 }", encoder.encode_kvp("opts", table_util.ordered({ a = 1 }, { "a" })))
+        assert.equals("args = [ 1, 2 ]", encoder.encode_kvp("args", { 1, 2 }))
+    end)
+end)
+
+describe("encode_kvps", function()
+    it("returns no lines for an empty table", function()
+        assert.same({}, encoder.encode_kvps({}))
+    end)
+
+    it("keeps key order when the table carries one", function()
+        local t = table_util.ordered({ b = 2, a = 1 }, { "b", "a" })
+        assert.same({ "b = 2", "a = 1" }, encoder.encode_kvps(t))
+    end)
+
+    it("sorts keys when the table carries no order", function()
+        assert.same({ "a = 1", "b = 2" }, encoder.encode_kvps({ b = 2, a = 1 }))
+    end)
+
+    it("keeps a sub-table inline instead of promoting it to a header", function()
+        local t = table_util.ordered({ env = table_util.ordered({ A = "1" }, { "A" }), jobs = 4 },
+            { "env", "jobs" })
+        assert.same({ 'env = { A = "1" }', "jobs = 4" }, encoder.encode_kvps(t))
+    end)
+end)
+
+describe("encode_header", function()
+    it("joins the segments with dots", function()
+        assert.equals("[tasks.build]", encoder.encode_header({ "tasks", "build" }))
+    end)
+
+    it("quotes each segment independently", function()
+        assert.equals('[tasks."my task".env]', encoder.encode_header({ "tasks", "my task", "env" }))
+    end)
+
+    it("encodes a single segment", function()
+        assert.equals("[tasks]", encoder.encode_header({ "tasks" }))
+    end)
+end)
+
 describe("encode_table_entry", function()
     it("quotes each segment of a dotted header independently", function()
         assert.equals('[tasks."my task"]\ntype = "shell"',
