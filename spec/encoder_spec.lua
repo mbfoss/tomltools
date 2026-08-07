@@ -139,4 +139,16 @@ describe("encode_table_entry", function()
     it("emits a bare header for an empty table", function()
         assert.equals("[tasks.build]", encoder.encode_table_entry({ "tasks", "build" }, {}))
     end)
+
+    it("promotes sub-tables to their own headers by default", function()
+        assert.equals('[tasks.build]\ntype = "shell"\n\n[tasks.build.env]\nCI = "1"',
+            encoder.encode_table_entry({ "tasks", "build" }, { type = "shell", env = { CI = "1" } }))
+    end)
+
+    it("keeps sub-tables inline with inline_subtables", function()
+        assert.equals('[tasks.build]\nenv = { CI = "1" }\ntype = "shell"',
+            encoder.encode_table_entry({ "tasks", "build" },
+                { type = "shell", env = { CI = "1" } },
+                { inline_subtables = true }))
+    end)
 end)

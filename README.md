@@ -92,6 +92,11 @@ toml.encode({ name = "hello", value = 42, server = { host = "localhost", port = 
 -- A single snippet as lines, for inserting into an existing document:
 toml.encode_entry({ host = "localhost", port = 8080 }, { style = "table", key = "server" })
 toml.encode_entry({ name = "build" }, { style = "aot", key = "task" })
+
+-- "table" style promotes sub-tables to their own [headers]; inline_subtables
+-- keeps them as `env = { CI = "1" }` so the snippet stays one contiguous block:
+toml.encode_entry({ type = "shell", env = { CI = "1" } },
+    { style = "table", key = { "tasks", "build" }, inline_subtables = true })
 ```
 
 ### Formatting
@@ -106,7 +111,7 @@ local formatted, errors = toml.format(text)  -- normalised TOML, or nil + errors
 |---|---|---|
 | `decode(text, schema?)` | `data, errors` | Decode, and optionally validate. Errors carry source ranges. |
 | `encode(value)` | `string` | Encode a Lua table to a complete TOML document. |
-| `encode_entry(t, opts?)` | `string[]` | Encode a single snippet as lines. `opts.style` is `"inline"` (default), `"table"`, or `"aot"`. |
+| `encode_entry(t, opts?)` | `string[]` | Encode a single snippet as lines. `opts.style` is `"inline"` (default), `"table"`, or `"aot"`; `opts.inline_subtables` keeps nested tables inline under `"table"`. |
 | `format(text)` | `string?, errors?` | Reformat a TOML document (preserves comments). |
 | `validate(data, schema)` | `ok, errors` | Validate an already-decoded value against a JSON Schema. |
 | `find_path(text, row, col)` | `PathNode[]?` | Structural TOML path. |
